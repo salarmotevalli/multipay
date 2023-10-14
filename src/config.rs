@@ -1,18 +1,15 @@
-use std::collections::HashMap;
 
-use serde_json::Value;
 
+use crate::drivers::{Driver, zarinpal::ZarinPal};
 
 pub struct Config {
-    default: Driver,
-    drivers: HashMap<String, Value>
+    default_driver: Box<dyn Driver>,
 }
 
 impl Config {
     pub fn load_config(init: &str) -> Self {
-        Config { config: serde_json::from_str(init).expect("drivers config is not in currect format") }
-    }
-    pub fn get(&self, drv: String) -> Option<&Value> {
-        self.config.get(&drv)
+        Config {
+            default_driver: Box::new(ZarinPal::new()),
+        }
     }
 }
