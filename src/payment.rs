@@ -2,23 +2,25 @@ use super::invoice::Invoice;
 
 #[derive(Default)]
 pub struct Payment {
-   config: Vec<String>,
-   setting: Vec<String>,
-   callback_url: String,
-   driver: String,
-   driver_instance: String,
-   invoice: Invoice,
+    config: Vec<String>,
+    setting: Vec<String>,
+    callback_url: String,
+    driver: String,
+    driver_instance: String,
+    invoice: Invoice,
 }
 
 impl Payment {
-   pub fn new() -> Self {
-        Self::via(Vec::<String>::new()); 
-        Payment{..Default::default()}
-   } 
+    pub fn new() -> Self {
+        //    Self::via(String::new());
+        Payment {
+            ..Default::default()
+        }
+    }
 
-   pub fn set_config(&mut self, config: Vec<String>) {
+    pub fn set_config(&mut self, config: Vec<String>) {
         self.config = config;
-   }
+    }
 
     pub fn get_default_config() -> String {
         String::new()
@@ -28,13 +30,9 @@ impl Payment {
         unimplemented!()
     }
 
-    pub fn callback_url(url: String) {
+    pub fn callback_url(url: String) {}
 
-    }
-
-    pub fn reset_callback_url() {
-
-    }
+    pub fn reset_callback_url() {}
 
     pub fn amount(&mut self, amount: f64) {
         self.invoice.amount(amount);
@@ -61,5 +59,4 @@ impl Payment {
     pub fn pay() {
         unimplemented!()
     }
-
 }

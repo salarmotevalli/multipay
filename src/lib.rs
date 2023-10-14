@@ -1,2 +1,6 @@
-mod payment;
+mod config;
+
 mod invoice;
+mod payment;
+
+mod traits;

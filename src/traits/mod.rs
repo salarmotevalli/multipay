@@ -1,0 +1,1 @@
+mod has_detail;

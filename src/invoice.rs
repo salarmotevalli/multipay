@@ -1,4 +1,3 @@
-
 #[derive(Default)]
 pub struct Invoice {
     uuid: String,
@@ -8,9 +7,10 @@ pub struct Invoice {
 }
 
 impl Invoice {
-    
     pub fn new() -> Self {
-        Invoice{..Default::default()}
+        Invoice {
+            ..Default::default()
+        }
     }
 
     pub fn uuid(&mut self, uuid: String) {
