@@ -1,6 +1,4 @@
-
-
-use crate::drivers::{Driver, zarinpal::ZarinPal};
+use crate::drivers::{zarinpal::ZarinPal, Driver};
 
 pub struct Config {
     default_driver: Box<dyn Driver>,

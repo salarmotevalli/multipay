@@ -47,7 +47,7 @@ impl Payment {
     }
 
     pub fn via(&mut self, driver: String) {
-        self.driver = driver;
+        self.driver = driver.clone();
         self.invoice.via(driver);
         unimplemented!()
     }

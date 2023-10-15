@@ -1,8 +1,11 @@
+use std::collections::HashMap;
+
 #[derive(Default)]
 pub struct Invoice {
     uuid: String,
     amount: f64,
     transaction_id: String,
+    detail: HashMap<String, String>,
     deriver: String,
 }
 
@@ -37,11 +40,19 @@ impl Invoice {
         self.transaction_id.clone()
     }
 
-    pub fn driver(&mut self, driver: String) {
-        self.deriver = driver;
+    pub fn detail(&mut self, key: String, value: String) {
+        self.detail.insert(key, value);
+    }
+
+    pub fn get_detail(&self, key: String) -> Option<&String> {
+        self.detail.get(&key)
     }
 
     pub fn get_driver(&self) -> String {
         self.deriver.clone()
+    }
+
+    pub fn via(&mut self, deriver: String) {
+        self.deriver = deriver;
     }
 }
