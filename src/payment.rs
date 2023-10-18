@@ -1,38 +1,55 @@
+use std::{collections::HashMap, rc::Rc};
+
+use observe::Observer;
+
+use crate::{
+    drivers::{zarinpal::ZarinPal, Driver},
+    events::{PaymentEmmiter, PaymentEvent},
+};
+
 use super::invoice::Invoice;
 
-#[derive(Default)]
 pub struct Payment {
-    config: Vec<String>,
-    setting: Vec<String>,
+    setting: HashMap<String, String>,
     callback_url: String,
     driver: String,
-    driver_instance: String,
+    driver_instance: Rc<dyn Driver>,
     invoice: Invoice,
+}
+
+impl Default for Payment {
+    fn default() -> Self {
+        Payment {
+            driver_instance: Rc::new(ZarinPal::new()),
+            ..Default::default()
+        }
+    }
+}
+
+impl Observer<PaymentEvent> for Payment {
+    fn on_notify(&self, event: &PaymentEvent) {
+        match event {
+            PaymentEvent::Purchase => println!("Hello"),
+        }
+    }
 }
 
 impl Payment {
     pub fn new() -> Self {
-        //    Self::via(String::new());
-        Payment {
-            ..Default::default()
-        }
+        Default::default()
     }
 
-    pub fn set_config(&mut self, config: Vec<String>) {
-        self.config = config;
+    pub fn set_setting(&mut self, key: String, value: String) {
+        self.setting.insert(key, value);
     }
 
-    pub fn get_default_config() -> String {
-        String::new()
+    pub fn callback_url(&mut self, url: String) {
+        self.set_setting("callbackUrl".to_string(), url)
     }
 
-    pub fn config() -> String {
-        unimplemented!()
+    pub fn reset_callback_url(&mut self) {
+        self.set_setting("callbackUrl".to_string(), "".to_string())
     }
-
-    pub fn callback_url(url: String) {}
-
-    pub fn reset_callback_url() {}
 
     pub fn amount(&mut self, amount: f64) {
         self.invoice.amount(amount);
@@ -46,17 +63,48 @@ impl Payment {
         self.invoice.transaction_id(id);
     }
 
+    pub fn invoice(&mut self, invoice: Invoice) {
+        self.invoice = invoice;
+    }
+
     pub fn via(&mut self, driver: String) {
         self.driver = driver.clone();
         self.invoice.via(driver);
         unimplemented!()
     }
 
-    pub fn purchase() {
+    pub fn purchase(
+        &mut self,
+        invoice: Option<Invoice>,
+        finalize_callback: fn(Box<dyn Driver>, String),
+    ) {
+        if let Some(inv) = invoice {
+            self.invoice(inv)
+        }
+
+        self.driver_instance = self.get_fresh_driver_instance();
+
+        let transaction_id = self.driver_instance.purchase();
+
+        //        finalize_callback(self.driver_instance, transaction_id);
+
+        self.emit(PaymentEvent::Purchase);
+    }
+
+    pub fn pay(&mut self, initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>) {
+        // self.driver_instance = self.get_driver_instance();
+        
+        if let Some(ini_fn) = initialize_callback {
+            ini_fn(Rc::clone(&self.driver_instance));
+        } 
+    }
+
+    pub fn get_fresh_driver_instance(&mut self) -> Rc<dyn Driver> {
         unimplemented!()
     }
 
-    pub fn pay() {
-        unimplemented!()
+    fn emit(&self, event: PaymentEvent) {
+        let mut emitter = PaymentEmmiter::new();
+        emitter.add_observer(Payment::new());
     }
 }
