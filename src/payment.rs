@@ -1,10 +1,7 @@
 use std::{collections::HashMap, rc::Rc};
-
-use observe::Observer;
-
 use crate::{
     drivers::{zarinpal::ZarinPal, Driver},
-    events::{PaymentEmmiter, PaymentEvent},
+    events,
 };
 
 use super::invoice::Invoice;
@@ -21,18 +18,14 @@ impl Default for Payment {
     fn default() -> Self {
         Payment {
             driver_instance: Rc::new(ZarinPal::new()),
-            ..Default::default()
+            setting: HashMap::new(),
+            driver: String::new(),
+            invoice: Invoice::new(),
+            callback_url: String::new(),
         }
     }
 }
 
-impl Observer<PaymentEvent> for Payment {
-    fn on_notify(&self, event: &PaymentEvent) {
-        match event {
-            PaymentEvent::Purchase => println!("Hello"),
-        }
-    }
-}
 
 impl Payment {
     pub fn new() -> Self {
@@ -76,7 +69,7 @@ impl Payment {
     pub fn purchase(
         &mut self,
         invoice: Option<Invoice>,
-        finalize_callback: fn(Box<dyn Driver>, String),
+        finalize_callback: fn(Rc<dyn Driver>, String),
     ) {
         if let Some(inv) = invoice {
             self.invoice(inv)
@@ -88,27 +81,44 @@ impl Payment {
 
         //        finalize_callback(self.driver_instance, transaction_id);
 
-        self.emit(PaymentEvent::Purchase);
+        self.emit(events::PaymentEvent::Purchase);
     }
 
     pub fn pay(&mut self, initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>) {
         // self.driver_instance = self.get_driver_instance();
-        
+
         if let Some(ini_fn) = initialize_callback {
             ini_fn(Rc::clone(&self.driver_instance));
-        } 
+        }
 
-        self.emit(PaymentEvent::Pay);
+        self.emit(events::PaymentEvent::Pay);
 
         self.driver_instance.pay();
     }
 
-    pub fn get_fresh_driver_instance(&mut self) -> Rc<dyn Driver> {
-        unimplemented!()
+    pub fn verify(&self, initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>) {
+        let receip = self.driver_instance.verify();
+
+        if let Some(ini_fn) = initialize_callback {
+            ini_fn(Rc::clone(&self.driver_instance));
+        }
+
+        self.emit(events::PaymentEvent::Verify);
+
+        receip
     }
 
-    fn emit(&self, event: PaymentEvent) {
-        let mut emitter = PaymentEmmiter::new();
+    pub fn get_fresh_driver_instance(&mut self) -> Rc<dyn Driver> {
+        unimplemented!();
+    }
+
+    fn emit(&self, event: events::PaymentEvent) {
+        let mut emitter = events::PaymentEmmiter::new();
+
+        // attach payment observe
         emitter.add_observer(Payment::new());
+
+        // fire event
+        emitter.notify(&event);
     }
 }
