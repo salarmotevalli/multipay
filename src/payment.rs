@@ -97,6 +97,10 @@ impl Payment {
         if let Some(ini_fn) = initialize_callback {
             ini_fn(Rc::clone(&self.driver_instance));
         } 
+
+        self.emit(PaymentEvent::Pay);
+
+        self.driver_instance.pay();
     }
 
     pub fn get_fresh_driver_instance(&mut self) -> Rc<dyn Driver> {
