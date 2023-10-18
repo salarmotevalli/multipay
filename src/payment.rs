@@ -97,7 +97,7 @@ impl Payment {
     }
 
     pub fn verify(&self, initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>) {
-        let receip = self.driver_instance.verify();
+        let receipt = self.driver_instance.verify();
 
         if let Some(ini_fn) = initialize_callback {
             ini_fn(Rc::clone(&self.driver_instance));
@@ -105,7 +105,7 @@ impl Payment {
 
         self.emit(events::PaymentEvent::Verify);
 
-        receip
+        receipt
     }
 
     pub fn get_fresh_driver_instance(&mut self) -> Rc<dyn Driver> {
