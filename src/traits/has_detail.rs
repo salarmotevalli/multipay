@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 pub trait HasDetail {
-    fn detail(key: String, value: String) {}
+    fn detail(_key: String, _value: String) {}
 
     fn get_detail() {}
 

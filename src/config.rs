@@ -5,7 +5,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load_config(init: &str) -> Self {
+    pub fn load_config(_init: &str) -> Self {
         Config {
             default_driver: Box::new(ZarinPal::new()),
         }

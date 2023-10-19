@@ -1,2 +1,2 @@
 mod has_detail;
-mod receipt;
+pub mod has_receipt;

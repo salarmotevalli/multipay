@@ -1,8 +1,8 @@
-use std::{collections::HashMap, rc::Rc};
 use crate::{
     drivers::{zarinpal::ZarinPal, Driver},
     events,
 };
+use std::{collections::HashMap, rc::Rc};
 
 use super::invoice::Invoice;
 
@@ -25,7 +25,6 @@ impl Default for Payment {
         }
     }
 }
-
 
 impl Payment {
     pub fn new() -> Self {
@@ -69,7 +68,7 @@ impl Payment {
     pub fn purchase(
         &mut self,
         invoice: Option<Invoice>,
-        finalize_callback: fn(Rc<dyn Driver>, String),
+        _finalize_callback: fn(Rc<dyn Driver>, String),
     ) {
         if let Some(inv) = invoice {
             self.invoice(inv)
@@ -77,7 +76,7 @@ impl Payment {
 
         self.driver_instance = self.get_fresh_driver_instance();
 
-        let transaction_id = self.driver_instance.purchase();
+        let _transaction_id = self.driver_instance.purchase();
 
         //        finalize_callback(self.driver_instance, transaction_id);
 
