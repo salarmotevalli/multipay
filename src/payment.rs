@@ -1,32 +1,33 @@
+
+use std::{collections::HashMap, rc::Rc};
 use crate::{
     drivers::{zarinpal::ZarinPal, Driver},
     events,
 };
-use std::{collections::HashMap, rc::Rc};
+use crate::receipt::Receipt;
+use crate::invoice::Invoice;
 
-use super::invoice::Invoice;
-
-pub struct Payment {
+pub struct Payment<'a> {
     setting: HashMap<String, String>,
-    callback_url: String,
+    callback_url: &'a str,
     driver: String,
     driver_instance: Rc<dyn Driver>,
-    invoice: Invoice,
+    invoice: Invoice<'a>,
 }
 
-impl Default for Payment {
+impl<'a> Default for Payment<'a> {
     fn default() -> Self {
         Payment {
             driver_instance: Rc::new(ZarinPal::new()),
             setting: HashMap::new(),
             driver: String::new(),
             invoice: Invoice::new(),
-            callback_url: String::new(),
+            callback_url: "",
         }
     }
 }
 
-impl Payment {
+impl<'a> Payment<'a> {
     pub fn new() -> Self {
         Default::default()
     }
@@ -51,11 +52,11 @@ impl Payment {
         self.invoice.detail(key, value);
     }
 
-    pub fn transaction_id(&mut self, id: String) {
+    pub fn transaction_id(&mut self, id: &'a str) {
         self.invoice.transaction_id(id);
     }
 
-    pub fn invoice(&mut self, invoice: Invoice) {
+    pub fn invoice(&mut self, invoice: Invoice<'a>) {
         self.invoice = invoice;
     }
 
@@ -67,7 +68,7 @@ impl Payment {
 
     pub fn purchase(
         &mut self,
-        invoice: Option<Invoice>,
+        invoice: Option<Invoice<'a>>,
         _finalize_callback: fn(Rc<dyn Driver>, String),
     ) {
         if let Some(inv) = invoice {
@@ -92,10 +93,10 @@ impl Payment {
 
         self.emit(events::PaymentEvent::Pay);
 
-        self.driver_instance.pay();
+        //self.driver_instance.pay();
     }
 
-    pub fn verify(&self, initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>) {
+    pub fn verify(&self, initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>) -> Receipt<'_> {
         let receipt = self.driver_instance.verify();
 
         if let Some(ini_fn) = initialize_callback {

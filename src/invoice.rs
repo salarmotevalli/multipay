@@ -1,15 +1,15 @@
 use std::collections::HashMap;
 
 #[derive(Default)]
-pub struct Invoice {
+pub struct Invoice<'a> {
     uuid: String,
     amount: f64,
-    transaction_id: String,
+    transaction_id: &'a str,
     detail: HashMap<String, String>,
     deriver: String,
 }
 
-impl Invoice {
+impl<'a> Invoice<'a> {
     pub fn new() -> Self {
         Invoice {
             ..Default::default()
@@ -32,12 +32,12 @@ impl Invoice {
         self.amount
     }
 
-    pub fn transaction_id(&mut self, id: String) {
+    pub fn transaction_id(&mut self, id: &'a str) {
         self.transaction_id = id;
     }
 
-    pub fn get_transaction_id(&self) -> String {
-        self.transaction_id.clone()
+    pub fn get_transaction_id(&self) -> &'a str {
+        self.transaction_id
     }
 
     pub fn detail(&mut self, key: String, value: String) {

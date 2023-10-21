@@ -1,3 +1,6 @@
+
+use crate::receipt::Receipt;
+
 use super::Driver;
 
 pub struct ZarinPal {}
@@ -7,8 +10,8 @@ impl Driver for ZarinPal {
         unimplemented!()
     }
 
-    fn verify(&self) {
-        unimplemented!()
+    fn verify(&self) -> Receipt {
+        Receipt::new("test_id")
     }
 
     fn purchase(&self) -> String {

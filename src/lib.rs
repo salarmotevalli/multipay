@@ -7,3 +7,6 @@ mod receipt;
 mod drivers;
 mod events;
 mod traits;
+
+#[cfg(test)]
+mod tests;
