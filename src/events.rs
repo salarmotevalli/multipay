@@ -9,7 +9,7 @@ pub enum PaymentEvent {
 
 pub type PaymentEmmiter = Subject<PaymentEvent>;
 
-impl<'a> Observer<PaymentEvent> for Payment<'a> {
+impl Observer<PaymentEvent> for Payment {
     fn on_notify(&self, event: &PaymentEvent) {
         use PaymentEvent::*;
 

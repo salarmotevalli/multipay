@@ -1,26 +1,29 @@
 use std::collections::HashMap;
 
-#[derive(Default)]
-pub struct Invoice<'a> {
-    uuid: String,
+#[derive(Clone)]
+pub struct Invoice {
+    uuid: &'static str,
     amount: f64,
-    transaction_id: &'a str,
+    transaction_id: &'static str,
     detail: HashMap<String, String>,
-    deriver: String,
+    // deriver: String,
 }
 
-impl<'a> Invoice<'a> {
-    pub fn new() -> Self {
+impl Invoice {
+    pub fn new(amount: f64) -> Self {
         Invoice {
-            ..Default::default()
+            amount,
+            uuid: "",
+            transaction_id: "",
+            detail: HashMap::new(),
         }
     }
 
-    pub fn uuid(&mut self, uuid: String) {
+    pub fn uuid(&mut self, uuid: &'static str) {
         self.uuid = uuid;
     }
 
-    pub fn get_uuid(&self) -> String {
+    pub fn get_uuid(&self) -> &'static str {
         self.uuid.clone()
     }
 
@@ -32,11 +35,11 @@ impl<'a> Invoice<'a> {
         self.amount
     }
 
-    pub fn transaction_id(&mut self, id: &'a str) {
+    pub fn transaction_id(&mut self, id: &'static str) {
         self.transaction_id = id;
     }
 
-    pub fn get_transaction_id(&self) -> &'a str {
+    pub fn get_transaction_id(&self) -> &'static str {
         self.transaction_id
     }
 
@@ -46,13 +49,5 @@ impl<'a> Invoice<'a> {
 
     pub fn get_detail(&self, key: String) -> Option<&String> {
         self.detail.get(&key)
-    }
-
-    pub fn get_driver(&self) -> String {
-        self.deriver.clone()
-    }
-
-    pub fn via(&mut self, deriver: String) {
-        self.deriver = deriver;
     }
 }

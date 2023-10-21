@@ -6,20 +6,18 @@ pub struct Receipt<'a> {
 }
 
 impl<'a> Receipt<'a> {
-    pub fn new(ref_id: &'a str) -> Self
-    {
+    pub fn new(ref_id: &'a str) -> Self {
         Receipt {
             reference_id: ref_id,
             date: SystemTime::now(),
         }
     }
 
-    fn get_date(&self) -> &SystemTime {
+    pub fn get_date(&self) -> &SystemTime {
         &self.date
     }
 
-    fn get_reference_id(&self) -> &'a str {
+    pub fn get_reference_id(&self) -> &'a str {
         self.reference_id
     }
 }
-

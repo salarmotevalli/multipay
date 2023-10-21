@@ -1,35 +1,27 @@
-
-use std::{collections::HashMap, rc::Rc};
+use crate::invoice::Invoice;
+use crate::receipt::Receipt;
 use crate::{
     drivers::{zarinpal::ZarinPal, Driver},
     events,
 };
-use crate::receipt::Receipt;
-use crate::invoice::Invoice;
+use std::{collections::HashMap, rc::Rc};
 
-pub struct Payment<'a> {
+#[derive(Clone)]
+pub struct Payment {
     setting: HashMap<String, String>,
-    callback_url: &'a str,
-    driver: String,
+    callback_url: &'static str,
     driver_instance: Rc<dyn Driver>,
-    invoice: Invoice<'a>,
+    invoice: Invoice,
 }
 
-impl<'a> Default for Payment<'a> {
-    fn default() -> Self {
+impl Payment {
+    pub fn new(invoice: Invoice) -> Self {
         Payment {
-            driver_instance: Rc::new(ZarinPal::new()),
             setting: HashMap::new(),
-            driver: String::new(),
-            invoice: Invoice::new(),
             callback_url: "",
+            driver_instance: Rc::new(ZarinPal::new("sandbox", invoice.clone())),
+            invoice,
         }
-    }
-}
-
-impl<'a> Payment<'a> {
-    pub fn new() -> Self {
-        Default::default()
     }
 
     pub fn set_setting(&mut self, key: String, value: String) {
@@ -52,51 +44,44 @@ impl<'a> Payment<'a> {
         self.invoice.detail(key, value);
     }
 
-    pub fn transaction_id(&mut self, id: &'a str) {
+    pub fn transaction_id(&mut self, id: &'static str) {
         self.invoice.transaction_id(id);
     }
 
-    pub fn invoice(&mut self, invoice: Invoice<'a>) {
-        self.invoice = invoice;
-    }
-
-    pub fn via(&mut self, driver: String) {
-        self.driver = driver.clone();
-        self.invoice.via(driver);
+    pub fn via(&mut self) {
+        // self.invoice.via(driver);
         unimplemented!()
     }
 
     pub fn purchase(
         &mut self,
-        invoice: Option<Invoice<'a>>,
-        _finalize_callback: fn(Rc<dyn Driver>, String),
-    ) {
-        if let Some(inv) = invoice {
-            self.invoice(inv)
-        }
-
+        finalize_callback: Option<fn(Rc<dyn Driver>, String)>,
+    ) { 
         self.driver_instance = self.get_fresh_driver_instance();
 
-        let _transaction_id = self.driver_instance.purchase();
+        let transaction_id = self.driver_instance.purchase();
 
-        //        finalize_callback(self.driver_instance, transaction_id);
+        if let Some(fnl_fn) = finalize_callback {
+            fnl_fn(Rc::clone(&self.driver_instance), transaction_id);
+        }
 
         self.emit(events::PaymentEvent::Purchase);
     }
 
     pub fn pay(&mut self, initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>) {
-        // self.driver_instance = self.get_driver_instance();
-
         if let Some(ini_fn) = initialize_callback {
             ini_fn(Rc::clone(&self.driver_instance));
         }
 
         self.emit(events::PaymentEvent::Pay);
 
-        //self.driver_instance.pay();
+        self.driver_instance.pay();
     }
 
-    pub fn verify(&self, initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>) -> Receipt<'_> {
+    pub fn verify(
+        &self,
+        initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>,
+    ) -> Receipt<'_> {
         let receipt = self.driver_instance.verify();
 
         if let Some(ini_fn) = initialize_callback {
@@ -116,7 +101,7 @@ impl<'a> Payment<'a> {
         let mut emitter = events::PaymentEmmiter::new();
 
         // attach payment observe
-        emitter.add_observer(Payment::new());
+        emitter.add_observer(self.clone());
 
         // fire event
         emitter.notify(&event);
