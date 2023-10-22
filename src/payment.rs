@@ -1,3 +1,4 @@
+use crate::drivers::zarinpal::ZarinPalConfig;
 use crate::invoice::Invoice;
 use crate::receipt::Receipt;
 use crate::{
@@ -19,7 +20,7 @@ impl Payment {
         Payment {
             setting: HashMap::new(),
             callback_url: "",
-            driver_instance: Rc::new(ZarinPal::new("sandbox", invoice.clone())),
+            driver_instance: Rc::new(ZarinPal::new(ZarinPalConfig::load(), invoice.clone())),
             invoice,
         }
     }

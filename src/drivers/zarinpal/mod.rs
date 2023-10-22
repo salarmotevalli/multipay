@@ -1,6 +1,8 @@
-mod sandbox;
 mod normal;
+mod sandbox;
 mod zaringate;
+
+use self::{normal::Normal, sandbox::Sandbox, zaringate::Zaringate};
 
 use super::Driver;
 use crate::{invoice::Invoice, receipt::Receipt};
@@ -50,23 +52,28 @@ impl ZarinPalConfig {
             currency: "R",
         }
     }
-
+    
+    #[inline]
     pub fn mode(&mut self, mode: &'static str) {
         self.mode = mode;
     }
-
+    
+    #[inline]
     pub fn merchent_id(&mut self, m_id: &'static str) {
         self.merchant_id = m_id;
     }
 
+    #[inline]
     pub fn callback_url(&mut self, callback_url: &'static str) {
         self.callback_url = callback_url;
     }
 
+    #[inline]
     pub fn description(&mut self, description: &'static str) {
         self.description = description;
     }
 
+    #[inline]
     pub fn currency(&mut self, currency: &'static str) {
         self.currency = currency;
     }
@@ -75,6 +82,7 @@ impl ZarinPalConfig {
 pub struct ZarinPal {
     config: ZarinPalConfig,
     invoice: Invoice,
+    strategy: Box<dyn Driver>
 }
 
 impl Driver for ZarinPal {
@@ -92,17 +100,15 @@ impl Driver for ZarinPal {
 }
 
 impl ZarinPal {
-    pub fn new(cnfig: ZarinPalConfig, invoice: Invoice) -> Self {
-        let stg = match cnfig.mode {
-            "normal" => ZarinpalStrategy::Normal,
-            "sandbox" => ZarinpalStrategy::SandBox,
-            "zariingate" => ZarinpalStrategy::Zaringate,
-            &_ => ZarinpalStrategy::Normal,
+    pub fn new(config: ZarinPalConfig, invoice: Invoice) -> Self {
+        let stg: Box<dyn Driver> = match config.mode {
+            "normal" => Box::new(Normal::new(invoice)),
+            "sandbox" => Box::new(Sandbox::new(invoice)),
+            "zariingate" => Box::new(Zaringate::new(invoice)),
+            &_ => Box::new(Normal::new(invoice)),
         };
 
-        ZarinPal {
-            strategy: cnfig,
-            invoice,
-        }
+        ZarinPal { config, invoice, strategy: stg }
     }
 }
+
