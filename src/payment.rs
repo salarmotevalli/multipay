@@ -53,10 +53,7 @@ impl Payment {
         unimplemented!()
     }
 
-    pub fn purchase(
-        &mut self,
-        finalize_callback: Option<fn(Rc<dyn Driver>, String)>,
-    ) { 
+    pub fn purchase(&mut self, finalize_callback: Option<fn(Rc<dyn Driver>, String)>) {
         self.driver_instance = self.get_fresh_driver_instance();
 
         let transaction_id = self.driver_instance.purchase();
@@ -81,7 +78,7 @@ impl Payment {
     pub fn verify(
         &self,
         initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>,
-    ) -> Receipt<'_> {
+    ) -> Receipt {
         let receipt = self.driver_instance.verify();
 
         if let Some(ini_fn) = initialize_callback {

@@ -1,12 +1,12 @@
 use std::time::SystemTime;
 
-pub struct Receipt<'a> {
-    reference_id: &'a str,
+pub struct Receipt {
+    reference_id: &'static str,
     date: SystemTime,
 }
 
-impl<'a> Receipt<'a> {
-    pub fn new(ref_id: &'a str) -> Self {
+impl Receipt {
+    pub fn new(ref_id: &'static str) -> Self {
         Receipt {
             reference_id: ref_id,
             date: SystemTime::now(),
@@ -17,7 +17,7 @@ impl<'a> Receipt<'a> {
         &self.date
     }
 
-    pub fn get_reference_id(&self) -> &'a str {
+    pub fn get_reference_id(&self) -> &'static str {
         self.reference_id
     }
 }
