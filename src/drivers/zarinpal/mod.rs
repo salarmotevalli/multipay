@@ -87,25 +87,25 @@ pub struct ZarinPal {
 
 impl Driver for ZarinPal {
     fn pay(&self) {
-        unimplemented!()
+        self.strategy.pay();
     }
 
     fn verify(&self) -> Receipt {
-        Receipt::new("test_id")
+        self.verify()
     }
 
     fn purchase(&self) -> String {
-        unimplemented!()
+        self.strategy.purchase()
     }
 }
 
 impl ZarinPal {
     pub fn new(config: ZarinPalConfig, invoice: Invoice) -> Self {
         let stg: Box<dyn Driver> = match config.mode {
-            "normal" => Box::new(Normal::new(invoice)),
-            "sandbox" => Box::new(Sandbox::new(invoice)),
-            "zariingate" => Box::new(Zaringate::new(invoice)),
-            &_ => Box::new(Normal::new(invoice)),
+            "normal" => Box::new(Normal::new(invoice.clone())),
+            "sandbox" => Box::new(Sandbox::new(invoice.clone())),
+            "zariingate" => Box::new(Zaringate::new(invoice.clone())),
+            &_ => Box::new(Normal::new(invoice.clone())),
         };
 
         ZarinPal { config, invoice, strategy: stg }
