@@ -57,7 +57,7 @@ impl Payment {
     pub fn purchase(&mut self, finalize_callback: Option<fn(Rc<dyn Driver>, String)>) {
         self.driver_instance = self.get_fresh_driver_instance();
 
-        let transaction_id = self.driver_instance.purchase();
+        let transaction_id = self.driver_instance.purchase().expect("test");
 
         if let Some(fnl_fn) = finalize_callback {
             fnl_fn(Rc::clone(&self.driver_instance), transaction_id);

@@ -1,17 +1,21 @@
-use crate::{drivers::Driver, invoice::Invoice};
+use crate::{drivers::Driver, invoice::Invoice, error::MultiPayErr};
+
+use super::ZarinPalConfig;
 
 pub(super) struct Normal {
     invoice: Invoice,
+    config: ZarinPalConfig,
 }
 
 impl Normal {
-    pub fn new(invoice: Invoice) -> Self {
-        Normal { invoice }
+    pub fn new(config: ZarinPalConfig, invoice: Invoice) -> Self {
+        Normal { config, invoice }
     }
 }
 
 impl Driver for Normal {
-    fn purchase(&self) -> String {
+    fn purchase(&self) -> Result<String, MultiPayErr> {
+        
         unimplemented!()
     }
 

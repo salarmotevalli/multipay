@@ -1,4 +1,4 @@
-mod config;
+mod error;
 
 mod invoice;
 mod payment;

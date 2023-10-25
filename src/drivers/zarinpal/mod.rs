@@ -5,7 +5,7 @@ mod zaringate;
 use self::{normal::Normal, sandbox::Sandbox, zaringate::Zaringate};
 
 use super::Driver;
-use crate::{invoice::Invoice, receipt::Receipt};
+use crate::{invoice::Invoice, receipt::Receipt, error::MultiPayErr};
 
 pub struct ZarinPalConfig {
     /* normal api */
@@ -52,12 +52,12 @@ impl ZarinPalConfig {
             currency: "R",
         }
     }
-    
+
     #[inline]
     pub fn mode(&mut self, mode: &'static str) {
         self.mode = mode;
     }
-    
+
     #[inline]
     pub fn merchent_id(&mut self, m_id: &'static str) {
         self.merchant_id = m_id;
@@ -80,9 +80,7 @@ impl ZarinPalConfig {
 }
 
 pub struct ZarinPal {
-    config: ZarinPalConfig,
-    invoice: Invoice,
-    strategy: Box<dyn Driver>
+    strategy: Box<dyn Driver>,
 }
 
 impl Driver for ZarinPal {
@@ -91,10 +89,10 @@ impl Driver for ZarinPal {
     }
 
     fn verify(&self) -> Receipt {
-        self.verify()
+        self.strategy.verify()
     }
 
-    fn purchase(&self) -> String {
+    fn purchase(&self) -> Result<String, MultiPayErr> {
         self.strategy.purchase()
     }
 }
@@ -102,13 +100,12 @@ impl Driver for ZarinPal {
 impl ZarinPal {
     pub fn new(config: ZarinPalConfig, invoice: Invoice) -> Self {
         let stg: Box<dyn Driver> = match config.mode {
-            "normal" => Box::new(Normal::new(invoice.clone())),
-            "sandbox" => Box::new(Sandbox::new(invoice.clone())),
-            "zariingate" => Box::new(Zaringate::new(invoice.clone())),
-            &_ => Box::new(Normal::new(invoice.clone())),
+            "normal" => Box::new(Normal::new(config, invoice)),
+            "sandbox" => Box::new(Sandbox::new(config, invoice)),
+            "zariingate" => Box::new(Zaringate::new(config, invoice)),
+            &_ => Box::new(Normal::new(config, invoice)),
         };
 
-        ZarinPal { config, invoice, strategy: stg }
+        ZarinPal { strategy: stg }
     }
 }
-

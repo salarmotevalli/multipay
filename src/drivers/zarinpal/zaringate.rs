@@ -1,17 +1,20 @@
-use crate::{drivers::Driver, invoice::Invoice};
+use crate::{drivers::Driver, invoice::Invoice, error::MultiPayErr};
+
+use super::ZarinPalConfig;
 
 pub(super) struct Zaringate {
+    config: ZarinPalConfig,
     invoice: Invoice,
 }
 
 impl Zaringate {
-    pub fn new(invoice: Invoice) -> Self {
-        Zaringate { invoice }
+    pub fn new(config: ZarinPalConfig, invoice: Invoice) -> Self {
+        Zaringate { config, invoice }
     }
 }
 
 impl Driver for Zaringate {
-    fn purchase(&self) -> String {
+    fn purchase(&self) -> Result<String, MultiPayErr>{
         unimplemented!()
     }
 
