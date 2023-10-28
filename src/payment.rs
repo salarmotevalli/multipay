@@ -1,8 +1,8 @@
-use event_observer::Subject;
 use crate::events::{PaymentEvent, PaymentObserve};
 use crate::invoice::Invoice;
 use crate::receipt::Receipt;
 use crate::{drivers::Driver, events};
+use event_observer::Subject;
 
 #[derive(Clone, Copy)]
 pub struct Payment<D: Driver + 'static> {
@@ -11,29 +11,11 @@ pub struct Payment<D: Driver + 'static> {
 }
 
 impl<D: Driver + 'static> Payment<D> {
-  
     pub fn new(invoice: Invoice) -> Self {
         Payment {
             callback_url: "",
             driver_instance: D::new(invoice),
         }
-    }
-
-    pub fn amount(&mut self, amount: f64) {
-        self.driver_instance.amount(amount);
-    }
-
-    pub fn detail(&mut self, key: String, value: String) {
-        self.driver_instance.detail(key, value);
-    }
-
-    pub fn transaction_id(&mut self, id: &'static str) {
-        self.driver_instance.transaction_id(id);
-    }
-
-    pub fn via(&mut self) {
-        // self.invoice.via(driver);
-        unimplemented!()
     }
 
     pub fn purchase(&mut self, finalize_callback: Option<fn(&D, String)>) {

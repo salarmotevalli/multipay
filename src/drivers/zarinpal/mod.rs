@@ -8,21 +8,6 @@ use super::{Driver, DriverConfig};
 use crate::{error::MultiPayErr, invoice::Invoice, receipt::Receipt};
 
 pub struct ZarinPalConfig {
-    /* normal api */
-    api_purchase_url: &'static str,
-    api_payment_url: &'static str,
-    api_verification_url: &'static str,
-
-    /* sandbox api */
-    sandbox_api_purchase_url: &'static str,
-    sandbox_api_payment_url: &'static str,
-    sandbox_api_verification_url: &'static str,
-
-    /* zarinGate api */
-    zaringate_api_purchase_url: &'static str,
-    zaringate_api_payment_url: &'static str,
-    zaringate_api_verification_url: &'static str,
-
     mode: &'static str, // can be normal, sandbox, zaringate
     merchant_id: &'static str,
     callback_url: &'static str,
@@ -33,18 +18,6 @@ pub struct ZarinPalConfig {
 impl DriverConfig for ZarinPalConfig {
     fn load() -> Self {
         ZarinPalConfig {
-            api_purchase_url: "https://api.zarinpal.com/pg/v4/payment/request.json",
-            api_payment_url: "https://www.zarinpal.com/pg/StartPay/",
-            api_verification_url: "https://api.zarinpal.com/pg/v4/payment/verify.json",
-
-            sandbox_api_purchase_url: "https://sandbox.zarinpal.com/pg/services/WebGate/wsdl",
-            sandbox_api_payment_url: "https://sandbox.zarinpal.com/pg/StartPay",
-            sandbox_api_verification_url: "https://sandbox.zarinpal.com/pg/services/WebGate/wsdl",
-
-            zaringate_api_purchase_url: "https://ir.zarinpal.com/pg/services/WebGate/wsdl",
-            zaringate_api_payment_url: "https://www.zarinpal.com/pg/StartPay/:authority/ZarinGate",
-            zaringate_api_verification_url: "https://ir.zarinpal.com/pg/services/WebGate/wsdl",
-
             mode: "normal",
             merchant_id: "",
             callback_url: "",
@@ -91,21 +64,6 @@ impl Driver for ZarinPal {
         ZarinPal {
             strategy: Box::new(Normal::new(invoice)),
         }
-    }
-
-    #[inline]
-    fn amount(&mut self, amount: f64) {
-        self.strategy.amount(amount);
-    }
-
-    #[inline]
-    fn transaction_id(&mut self, id: &'static str) {
-        self.strategy.transaction_id(id);
-    }
-
-    #[inline]
-    fn detail(&mut self, key: String, value: String) {
-        self.strategy.detail(key, value);
     }
 
     #[inline]

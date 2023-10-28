@@ -8,9 +8,6 @@ pub trait Driver {
     fn purchase(&self) -> Result<String, MultiPayErr>;
     fn pay(&self);
     fn verify(&self) -> Receipt;
-    fn detail(&mut self, key: String, value: String);
-    fn transaction_id(&mut self, id: &'static str);
-    fn amount(&mut self, amount: f64);
 }
 
 pub trait DriverConfig {

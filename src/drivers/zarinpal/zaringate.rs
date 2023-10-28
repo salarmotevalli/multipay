@@ -1,6 +1,10 @@
+use super::ZarinPalStrategy;
 use crate::{drivers::Driver, error::MultiPayErr, invoice::Invoice};
 
-use super::ZarinPalStrategy;
+static ZARINGATE_API_PURCHASE_URL: &str = "https://ir.zarinpal.com/pg/services/WebGate/wsdl";
+static ZARINGATE_API_PAYMENT_URL: &str =
+    "https://www.zarinpal.com/pg/StartPay/:authority/ZarinGate";
+static ZARINGATE_API_VERIFICATION_URL: &str = "https://ir.zarinpal.com/pg/services/WebGate/wsdl";
 
 pub(super) struct Zaringate {
     invoice: Invoice,
@@ -15,21 +19,6 @@ impl Driver for Zaringate {
     #[inline]
     fn purchase(&self) -> Result<String, MultiPayErr> {
         unimplemented!()
-    }
-
-    #[inline]
-    fn amount(&mut self, amount: f64) {
-        self.invoice.amount(amount);
-    }
-
-    #[inline]
-    fn detail(&mut self, key: String, value: String) {
-        self.invoice.detail(key, value);
-    }
-
-    #[inline]
-    fn transaction_id(&mut self, id: &'static str) {
-        self.invoice.transaction_id(id);
     }
 
     #[inline]
