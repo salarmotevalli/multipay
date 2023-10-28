@@ -1,15 +1,13 @@
-use std::{fmt::Display, error::Error};
+use std::{error::Error, fmt::Display};
 
 #[derive(Debug)]
 pub struct MultiPayErr {
-    message: &'static str
+    message: &'static str,
 }
 
 impl MultiPayErr {
     pub fn new(message: &'static str) -> Self {
-        MultiPayErr {
-            message
-        }
+        MultiPayErr { message }
     }
 }
 
@@ -20,4 +18,3 @@ impl Display for MultiPayErr {
 }
 
 impl Error for MultiPayErr {}
-

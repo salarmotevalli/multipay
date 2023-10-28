@@ -1,5 +1,4 @@
-use crate::payment::Payment;
-use event_observer::{Observer, Subject};
+use event_observer::Observer;
 
 pub enum PaymentEvent {
     Purchase,
@@ -7,9 +6,9 @@ pub enum PaymentEvent {
     Verify,
 }
 
-pub type PaymentEmmiter = Subject<PaymentEvent>;
+pub struct PaymentObserve;
 
-impl Observer<PaymentEvent> for Payment {
+impl Observer<PaymentEvent> for PaymentObserve {
     fn on_notify(&self, event: &PaymentEvent) {
         use PaymentEvent::*;
 

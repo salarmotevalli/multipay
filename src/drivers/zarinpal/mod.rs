@@ -2,10 +2,10 @@ mod normal;
 mod sandbox;
 mod zaringate;
 
-use self::{normal::Normal, sandbox::Sandbox, zaringate::Zaringate};
+use self::normal::Normal;
 
-use super::Driver;
-use crate::{invoice::Invoice, receipt::Receipt, error::MultiPayErr};
+use super::{Driver, DriverConfig};
+use crate::{error::MultiPayErr, invoice::Invoice, receipt::Receipt};
 
 pub struct ZarinPalConfig {
     /* normal api */
@@ -30,8 +30,8 @@ pub struct ZarinPalConfig {
     currency: &'static str, //Can be R, T (Rial, Toman)
 }
 
-impl ZarinPalConfig {
-    pub fn load() -> Self {
+impl DriverConfig for ZarinPalConfig {
+    fn load() -> Self {
         ZarinPalConfig {
             api_purchase_url: "https://api.zarinpal.com/pg/v4/payment/request.json",
             api_payment_url: "https://www.zarinpal.com/pg/StartPay/",
@@ -52,7 +52,9 @@ impl ZarinPalConfig {
             currency: "R",
         }
     }
+}
 
+impl ZarinPalConfig {
     #[inline]
     pub fn mode(&mut self, mode: &'static str) {
         self.mode = mode;
@@ -84,28 +86,42 @@ pub struct ZarinPal {
 }
 
 impl Driver for ZarinPal {
+    #[inline]
+    fn new(invoice: Invoice) -> Self {
+        ZarinPal {
+            strategy: Box::new(Normal::new(invoice)),
+        }
+    }
+
+    #[inline]
+    fn amount(&mut self, amount: f64) {
+        self.strategy.amount(amount);
+    }
+
+    #[inline]
+    fn transaction_id(&mut self, id: &'static str) {
+        self.strategy.transaction_id(id);
+    }
+
+    #[inline]
+    fn detail(&mut self, key: String, value: String) {
+        self.strategy.detail(key, value);
+    }
+
+    #[inline]
     fn pay(&self) {
-        self.strategy.pay();
+        self.strategy.as_ref().pay();
     }
 
+    #[inline]
     fn verify(&self) -> Receipt {
-        self.strategy.verify()
+        self.strategy.as_ref().verify()
     }
 
+    #[inline]
     fn purchase(&self) -> Result<String, MultiPayErr> {
-        self.strategy.purchase()
+        self.strategy.as_ref().purchase()
     }
 }
 
-impl ZarinPal {
-    pub fn new(config: ZarinPalConfig, invoice: Invoice) -> Self {
-        let stg: Box<dyn Driver> = match config.mode {
-            "normal" => Box::new(Normal::new(config, invoice)),
-            "sandbox" => Box::new(Sandbox::new(config, invoice)),
-            "zariingate" => Box::new(Zaringate::new(config, invoice)),
-            &_ => Box::new(Normal::new(config, invoice)),
-        };
-
-        ZarinPal { strategy: stg }
-    }
-}
+pub trait ZarinPalStrategy {}

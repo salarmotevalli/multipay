@@ -1,52 +1,34 @@
-use crate::drivers::zarinpal::ZarinPalConfig;
+use event_observer::Subject;
+use crate::events::{PaymentEvent, PaymentObserve};
 use crate::invoice::Invoice;
 use crate::receipt::Receipt;
-use crate::{
-    drivers::{zarinpal::ZarinPal, Driver},
-    events,
-};
-use std::{collections::HashMap, rc::Rc};
+use crate::{drivers::Driver, events};
 
-#[derive(Clone)]
-pub struct Payment {
-    setting: HashMap<String, String>,
+#[derive(Clone, Copy)]
+pub struct Payment<D: Driver + 'static> {
     callback_url: &'static str,
-    driver_instance: Rc<dyn Driver>,
-    invoice: Invoice,
+    driver_instance: D,
 }
 
-impl Payment {
+impl<D: Driver + 'static> Payment<D> {
+  
     pub fn new(invoice: Invoice) -> Self {
         Payment {
-            setting: HashMap::new(),
             callback_url: "",
-            driver_instance: Rc::new(ZarinPal::new(ZarinPalConfig::load(), invoice.clone())),
-            invoice,
+            driver_instance: D::new(invoice),
         }
     }
 
-    pub fn set_setting(&mut self, key: String, value: String) {
-        self.setting.insert(key, value);
-    }
-
-    pub fn callback_url(&mut self, url: String) {
-        self.set_setting("callbackUrl".to_string(), url)
-    }
-
-    pub fn reset_callback_url(&mut self) {
-        self.set_setting("callbackUrl".to_string(), "".to_string())
-    }
-
     pub fn amount(&mut self, amount: f64) {
-        self.invoice.amount(amount);
+        self.driver_instance.amount(amount);
     }
 
     pub fn detail(&mut self, key: String, value: String) {
-        self.invoice.detail(key, value);
+        self.driver_instance.detail(key, value);
     }
 
     pub fn transaction_id(&mut self, id: &'static str) {
-        self.invoice.transaction_id(id);
+        self.driver_instance.transaction_id(id);
     }
 
     pub fn via(&mut self) {
@@ -54,21 +36,19 @@ impl Payment {
         unimplemented!()
     }
 
-    pub fn purchase(&mut self, finalize_callback: Option<fn(Rc<dyn Driver>, String)>) {
-        self.driver_instance = self.get_fresh_driver_instance();
-
-        let transaction_id = self.driver_instance.purchase().expect("test");
+    pub fn purchase(&mut self, finalize_callback: Option<fn(&D, String)>) {
+        let transaction_id = &self.driver_instance.purchase().expect("test");
 
         if let Some(fnl_fn) = finalize_callback {
-            fnl_fn(Rc::clone(&self.driver_instance), transaction_id);
+            fnl_fn(&self.driver_instance, transaction_id.clone());
         }
 
         self.emit(events::PaymentEvent::Purchase);
     }
 
-    pub fn pay(&mut self, initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>) {
+    pub fn pay(&mut self, initialize_callback: Option<fn(deriver_instance: &D)>) {
         if let Some(ini_fn) = initialize_callback {
-            ini_fn(Rc::clone(&self.driver_instance));
+            ini_fn(&self.driver_instance);
         }
 
         self.emit(events::PaymentEvent::Pay);
@@ -76,14 +56,11 @@ impl Payment {
         self.driver_instance.pay();
     }
 
-    pub fn verify(
-        &self,
-        initialize_callback: Option<fn(deriver_instance: Rc<dyn Driver>)>,
-    ) -> Receipt {
+    pub fn verify(&self, initialize_callback: Option<fn(deriver_instance: &D)>) -> Receipt {
         let receipt = self.driver_instance.verify();
 
         if let Some(ini_fn) = initialize_callback {
-            ini_fn(Rc::clone(&self.driver_instance));
+            ini_fn(&self.driver_instance);
         }
 
         self.emit(events::PaymentEvent::Verify);
@@ -91,15 +68,10 @@ impl Payment {
         receipt
     }
 
-    pub fn get_fresh_driver_instance(&mut self) -> Rc<dyn Driver> {
-        unimplemented!();
-    }
+    fn emit(&self, event: PaymentEvent) {
+        let mut emitter = Subject::<PaymentEvent>::new();
 
-    fn emit(&self, event: events::PaymentEvent) {
-        let mut emitter = events::PaymentEmmiter::new();
-
-        // attach payment observe
-        emitter.add_observer(self.clone());
+        emitter.add_observer(PaymentObserve);
 
         // fire event
         emitter.notify(&event);

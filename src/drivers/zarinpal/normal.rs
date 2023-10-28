@@ -1,21 +1,29 @@
-use crate::{drivers::Driver, invoice::Invoice, error::MultiPayErr};
+use crate::{drivers::Driver, error::MultiPayErr, invoice::Invoice};
 
-use super::ZarinPalConfig;
+use super::ZarinPalStrategy;
 
 pub(super) struct Normal {
     invoice: Invoice,
-    config: ZarinPalConfig,
-}
-
-impl Normal {
-    pub fn new(config: ZarinPalConfig, invoice: Invoice) -> Self {
-        Normal { config, invoice }
-    }
 }
 
 impl Driver for Normal {
+    fn new(invoice: Invoice) -> Self {
+        Normal { invoice }
+    }
+
+    fn amount(&mut self, amount: f64) {
+        self.invoice.amount(amount);
+    }
+
+    fn detail(&mut self, key: String, value: String) {
+        self.invoice.detail(key, value);
+    }
+
+    fn transaction_id(&mut self, id: &'static str) {
+        self.invoice.transaction_id(id);
+    }
+
     fn purchase(&self) -> Result<String, MultiPayErr> {
-        
         unimplemented!()
     }
 
@@ -25,3 +33,5 @@ impl Driver for Normal {
         unimplemented!()
     }
 }
+
+impl ZarinPalStrategy for Normal {}
