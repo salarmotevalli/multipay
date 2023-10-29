@@ -1,4 +1,6 @@
-use crate::{drivers::Driver, error::MultiPayErr, invoice::Invoice};
+use std::collections::HashMap;
+
+use crate::{drivers::Driver, error::MultiPayErr, invoice::Invoice, DriverConfig};
 
 use super::ZarinPalStrategy;
 
@@ -8,11 +10,13 @@ static SANDBOX_API_VERIFICATION_URL: &str = "https://sandbox.zarinpal.com/pg/ser
 
 pub(super) struct Sandbox {
     invoice: Invoice,
+        config: HashMap<&'static str, &'static str>
+
 }
 
 impl Driver for Sandbox {
-    fn new(invoice: Invoice) -> Self {
-        Sandbox { invoice }
+    fn new(drv_cnf: HashMap<&str, &str>, invoice: Invoice) -> Self {
+        Sandbox { invoice, config: drv_cnf }
     }
 
     fn purchase(&self) -> Result<String, MultiPayErr> {

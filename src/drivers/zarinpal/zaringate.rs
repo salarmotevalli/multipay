@@ -1,5 +1,7 @@
+use std::collections::HashMap;
+
 use super::ZarinPalStrategy;
-use crate::{drivers::Driver, error::MultiPayErr, invoice::Invoice};
+use crate::{drivers::Driver, error::MultiPayErr, invoice::Invoice, DriverConfig};
 
 static ZARINGATE_API_PURCHASE_URL: &str = "https://ir.zarinpal.com/pg/services/WebGate/wsdl";
 static ZARINGATE_API_PAYMENT_URL: &str =
@@ -8,12 +10,14 @@ static ZARINGATE_API_VERIFICATION_URL: &str = "https://ir.zarinpal.com/pg/servic
 
 pub(super) struct Zaringate {
     invoice: Invoice,
+        config: HashMap<&'static str, &'static str>
+
 }
 
 impl Driver for Zaringate {
     #[inline]
-    fn new(invoice: Invoice) -> Self {
-        Zaringate { invoice }
+    fn new(drv_cnf: HashMap<&str, &str>, invoice: Invoice) -> Self {
+        Zaringate { invoice, config:drv_cnf }
     }
 
     #[inline]

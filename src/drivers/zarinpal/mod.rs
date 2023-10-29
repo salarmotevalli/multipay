@@ -2,7 +2,9 @@ mod normal;
 mod sandbox;
 mod zaringate;
 
-use self::normal::Normal;
+use std::collections::HashMap;
+
+use self::{normal::Normal, sandbox::Sandbox, zaringate::Zaringate};
 
 use super::{Driver, DriverConfig};
 use crate::{error::MultiPayErr, invoice::Invoice, receipt::Receipt};
@@ -60,9 +62,13 @@ pub struct ZarinPal {
 
 impl Driver for ZarinPal {
     #[inline]
-    fn new(invoice: Invoice) -> Self {
+    fn new(config: HashMap<&str, &str>, invoice: Invoice) -> Self {
         ZarinPal {
-            strategy: Box::new(Normal::new(invoice)),
+            strategy: match config.get("mode").unwrap() {
+                &"normal" => Box::new(Normal::new(config, invoice)),
+                &"sandbox" => Box::new(Sandbox::new(config, invoice)),
+                &"zaringate" => Box::new(Zaringate::new(config, invoice)),
+            },
         }
     }
 
