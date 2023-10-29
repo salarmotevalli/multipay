@@ -13,7 +13,7 @@ pub(super) struct Normal {
 }
 
 impl Driver for Normal {
-    fn new(drv_cnf: HashMap<&str, &str>, invoice: Invoice) -> Self {
+    fn new(drv_cnf: HashMap<&'static str, &'static str>, invoice: Invoice) -> Self {
         Normal { invoice , config: drv_cnf}
     }
 
@@ -27,6 +27,12 @@ impl Driver for Normal {
     fn verify(&self) -> crate::receipt::Receipt {
         unimplemented!()
     }
+
+        #[inline]
+        fn set_config(&mut self, config: HashMap<&'static str, &'static str>) {
+                self.config = config;
+        }
+
 }
 
 impl ZarinPalStrategy for Normal {}

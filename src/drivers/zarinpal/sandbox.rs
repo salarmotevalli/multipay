@@ -10,13 +10,15 @@ static SANDBOX_API_VERIFICATION_URL: &str = "https://sandbox.zarinpal.com/pg/ser
 
 pub(super) struct Sandbox {
     invoice: Invoice,
-        config: HashMap<&'static str, &'static str>
-
+    config: HashMap<&'static str, &'static str>,
 }
 
 impl Driver for Sandbox {
-    fn new(drv_cnf: HashMap<&str, &str>, invoice: Invoice) -> Self {
-        Sandbox { invoice, config: drv_cnf }
+    fn new(drv_cnf: HashMap<&'static str, &'static str>, invoice: Invoice) -> Self {
+        Sandbox {
+            invoice,
+            config: drv_cnf,
+        }
     }
 
     fn purchase(&self) -> Result<String, MultiPayErr> {
@@ -27,6 +29,11 @@ impl Driver for Sandbox {
 
     fn verify(&self) -> crate::receipt::Receipt {
         unimplemented!()
+    }
+
+    #[inline]
+    fn set_config(&mut self, config: HashMap<&'static str, &'static str>) {
+        self.config = config;
     }
 }
 

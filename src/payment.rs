@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::events::{PaymentEvent, PaymentObserve};
 use crate::invoice::Invoice;
 use crate::receipt::Receipt;
@@ -11,10 +13,10 @@ pub struct Payment<D: Driver + 'static> {
 }
 
 impl<D: Driver + 'static> Payment<D> {
-    pub fn new(invoice: Invoice) -> Self {
+    pub fn new(config: HashMap<&'static str, &'static str>, invoice: Invoice) -> Self {
         Payment {
             callback_url: "",
-            driver_instance: D::new(invoice),
+            driver_instance: D::new(config, invoice),
         }
     }
 

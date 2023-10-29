@@ -62,12 +62,13 @@ pub struct ZarinPal {
 
 impl Driver for ZarinPal {
     #[inline]
-    fn new(config: HashMap<&str, &str>, invoice: Invoice) -> Self {
+    fn new(config: HashMap<&'static str, &'static str>, invoice: Invoice) -> Self {
         ZarinPal {
             strategy: match config.get("mode").unwrap() {
                 &"normal" => Box::new(Normal::new(config, invoice)),
                 &"sandbox" => Box::new(Sandbox::new(config, invoice)),
                 &"zaringate" => Box::new(Zaringate::new(config, invoice)),
+                &&_ =>  Box::new(Normal::new(config, invoice)),
             },
         }
     }
@@ -85,6 +86,11 @@ impl Driver for ZarinPal {
     #[inline]
     fn purchase(&self) -> Result<String, MultiPayErr> {
         self.strategy.as_ref().purchase()
+    }
+
+    #[inline]
+    fn set_config(&mut self, config: HashMap<&'static str, &'static str>) {
+        self.strategy.set_config(config);
     }
 }
 
